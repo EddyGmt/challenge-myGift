@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste index{% endblock %}
+
+{% block body %}
+    <h1>Liste index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Cover</th>
+                <th>Theme</th>
+                <th>Status</th>
+                <th>Password</th>
+                <th>Date_ouveture</th>
+                <th>Date_fin_ouverture</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for liste in listes %}
+            <tr>
+                <td>{{ liste.id }}</td>
+                <td>{{ liste.title }}</td>
+                <td>{{ liste.description }}</td>
+                <td>{{ liste.cover }}</td>
+                <td>{{ liste.theme }}</td>
+                <td>{{ liste.status }}</td>
+                <td>{{ liste.password }}</td>
+                <td>{{ liste.dateOuveture ? liste.dateOuveture|date('Y-m-d') : '' }}</td>
+                <td>{{ liste.dateFinOuverture ? liste.dateFinOuverture|date('Y-m-d') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_liste_show', {'id': liste.id}) }}">show</a>
+                    <a href="{{ path('app_liste_edit', {'id': liste.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_liste_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste{% endblock %}
+
+{% block body %}
+    <h1>Liste</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ liste.id }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ liste.title }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ liste.description }}</td>
+            </tr>
+            <tr>
+                <th>Cover</th>
+                <td>{{ liste.cover }}</td>
+            </tr>
+            <tr>
+                <th>Theme</th>
+                <td>{{ liste.theme }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ liste.status }}</td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td>{{ liste.password }}</td>
+            </tr>
+            <tr>
+                <th>Date_ouveture</th>
+                <td>{{ liste.dateOuveture ? liste.dateOuveture|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Date_fin_ouverture</th>
+                <td>{{ liste.dateFinOuverture ? liste.dateFinOuverture|date('Y-m-d') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_liste_index') }}">back to list</a>
+
+    <a href="{{ path('app_liste_edit', {'id': liste.id}) }}">edit</a>
+
+    {{ include('liste/_delete_form.html.twig') }}
+{% endblock %}
