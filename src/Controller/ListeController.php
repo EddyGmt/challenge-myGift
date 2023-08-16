@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Liste;
 use App\Form\ListeType;
 use App\Repository\ListeRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/liste')]
 class ListeController extends AbstractController
 {
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/', name: 'app_liste_index', methods: ['GET'])]
     public function index(ListeRepository $listeRepository): Response
     {

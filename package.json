@@ -1,0 +1,18 @@
+{
+  "devDependencies": {
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
+    "bootstrap": "^5.3.1",
+    "sass": "^1.65.1",
+    "sass-loader": "13.0.0",
+    "stimulus": "^3.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@symfony/stimulus-bridge": "^3.2.2",
+    "@symfony/webpack-encore": "^4.4.0",
+    "webpack-encore-bundle": "symfony/webpack-encore-bundle"
+  }
+}
