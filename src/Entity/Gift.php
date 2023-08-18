@@ -25,6 +25,9 @@ class Gift
     #[ORM\Column(length: 255)]
     private ?string $link = null;
 
+    #[ORM\ManyToOne(inversedBy: 'giftId')]
+    private ?Liste $liste = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +77,18 @@ class Gift
     public function setLink(string $link): self
     {
         $this->link = $link;
+
+        return $this;
+    }
+
+    public function getListe(): ?Liste
+    {
+        return $this->liste;
+    }
+
+    public function setListe(?Liste $liste): static
+    {
+        $this->liste = $liste;
 
         return $this;
     }

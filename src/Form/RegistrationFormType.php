@@ -39,12 +39,6 @@ class RegistrationFormType extends AbstractType
                 ],
                 'label'=>'Email'
             ])
-            ->add('password', PasswordType::class,[
-                'attr'=>[
-                    'class'=>''
-                ],
-                'label'=>'Mot de Passe'
-            ])
             ->add('address', TextType::class,[
                 'attr'=>[
                     'class'=>''

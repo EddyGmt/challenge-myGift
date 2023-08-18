@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ListeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -37,6 +39,17 @@ class Liste
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_fin_ouverture = null;
+
+    #[ORM\OneToMany(mappedBy: 'liste', targetEntity: Gift::class)]
+    private Collection $giftId;
+
+    #[ORM\ManyToOne(inversedBy: 'listeId')]
+    private ?User $userId = null;
+
+    public function __construct()
+    {
+        $this->giftId = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -135,6 +148,48 @@ class Liste
     public function setDateFinOuverture(?\DateTimeInterface $date_fin_ouverture): self
     {
         $this->date_fin_ouverture = $date_fin_ouverture;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Gift>
+     */
+    public function getGiftId(): Collection
+    {
+        return $this->giftId;
+    }
+
+    public function addGiftId(Gift $giftId): static
+    {
+        if (!$this->giftId->contains($giftId)) {
+            $this->giftId->add($giftId);
+            $giftId->setListe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGiftId(Gift $giftId): static
+    {
+        if ($this->giftId->removeElement($giftId)) {
+            // set the owning side to null (unless already changed)
+            if ($giftId->getListe() === $this) {
+                $giftId->setListe(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUserId(): ?User
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(?User $userId): static
+    {
+        $this->userId = $userId;
 
         return $this;
     }
