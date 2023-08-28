@@ -21,47 +21,53 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('firstname', TextType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('firstname', TextType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Prénom'
+                'label' => 'Prénom'
             ])
-            ->add('lastname', TextType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('lastname', TextType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Nom de famille'
+                'label' => 'Nom de famille'
             ])
-            ->add('email', EmailType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('username', TextType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Email'
+                'label' => 'Pseudo'
             ])
-            ->add('address', TextType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('email', EmailType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Adresse'
+                'label' => 'Email'
             ])
-            ->add('zipcode', NumberType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('address', TextType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Code Postal'
+                'label' => 'Adresse'
             ])
-            ->add('city', TextType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('zipcode', NumberType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Ville'
+                'label' => 'Code Postal'
             ])
-            ->add('country', TextType::class,[
-                'attr'=>[
-                    'class'=>''
+            ->add('city', TextType::class, [
+                'attr' => [
+                    'class' => ''
                 ],
-                'label'=>'Pays'
+                'label' => 'Ville'
+            ])
+            ->add('country', TextType::class, [
+                'attr' => [
+                    'class' => ''
+                ],
+                'label' => 'Pays'
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
@@ -87,8 +93,7 @@ class RegistrationFormType extends AbstractType
                         'max' => 4096,
                     ]),
                 ],
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

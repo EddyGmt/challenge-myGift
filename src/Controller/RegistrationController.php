@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 class RegistrationController extends AbstractController
 {
@@ -41,6 +43,21 @@ class RegistrationController extends AbstractController
                 $request
             );
         }
+
+        if($user->isIsActive()){
+            //Envoie de l'email de validation
+            $adminEmail = 'eddygt1998@gmail.com';
+            $message = (new Email())
+                ->from('noreply@example.com')
+                ->to($adminEmail)
+                ->subject('Nouvel utilisateur en attente de validation')
+                ->html('Un nouvel utilisateur est en attente de validation.');
+
+            $mailer->send($message);
+
+
+        }
+
 
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form->createView(),
