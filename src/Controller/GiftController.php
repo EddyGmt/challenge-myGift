@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Goutte\Client;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/gift')]
 class GiftController extends AbstractController
@@ -75,4 +77,28 @@ class GiftController extends AbstractController
 
         return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
     }
+
+//    public function scrapGift(Request $request, Gift $gift, GiftRepository $giftRepository): Response
+//    {
+//        //On récupère le lien qui sera notre requete
+//        $link = $request->request->get('link'); // Récupère le lien depuis le formulaire
+//        $client = new Client();
+//        $crawler = $client->request('GET', $link);
+//
+//        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
+//        $name = $crawler->filter('name')->text();
+//        $description = $crawler->filter('description')->text();
+//        $image = $crawler->filter('img')->text();
+//        $price = $crawler->filter('price')->text();
+//
+//
+//        $gift = new Gift();
+//        $gift->setImage($image);
+//        $gift->setName($name);
+//        $gift->setPrice($price);
+//        $gift->setImage($image);
+//
+//
+//        return;
+//    }
 }

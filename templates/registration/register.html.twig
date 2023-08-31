@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends './base.html.twig' %}
 
 {% block title %}Inscription{% endblock %}
 
@@ -15,6 +15,7 @@
         {{ form_row(registrationForm.city) }}
         {{ form_row(registrationForm.country) }}
         {{ form_row(registrationForm.email) }}
+        {{ form_row(registrationForm.username) }}
         {{ form_row(registrationForm.plainPassword, {
             label: 'Mot de passe'
         }) }}

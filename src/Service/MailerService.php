@@ -1,43 +1,35 @@
 <?php
-
 namespace App\Service;
 
-use SendinBlue;
-use GuzzleHttp;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mailer\MailerInterface;
 
 class MailerService
 {
     private $mailer;
-    private $urlGenerator;
 
-    public function __construct(UrlGeneratorInterface $urlGenerator)
+    public function __construct(MailerInterface $mailer)
     {
-        $this->urlGenerator = $urlGenerator;
+        $this->mailer = $mailer;
     }
 
     public function send(
-        array $from,
-        array $to,
+        string $from,
+        string $to,
         string $subject,
-        string $content,
+        string $template,
         array $context
-    ):void
+    ): void
     {
-        $config = SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['SENDINBLUE_KEY']);
+        //On crée le mail
+        $email = (new TemplatedEmail())
+            ->from($from)
+            ->to($to)
+            ->subject($subject)
+            ->htmlTemplate("emails/$template.html.twig")
+            ->context($context);
 
-        $apiInstance = new SendinBlue\Client\Api\TransactionalEmailsApi(
-            new GuzzleHttp\Client(),
-            $config
-        );
-        $sendSmtpEmail = new \SendinBlue\Client\Model\SendSmtpEmail();
-        $sendSmtpEmail['subject'] = $subject;
-        $sendSmtpEmail['htmlContent'] = $content;
-        $sendSmtpEmail['sender'] = $from;
-        $sendSmtpEmail['to'] = array($to);
-
-        $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
-
+        // On envoie le mail
+        $this->mailer->send($email);
     }
-
 }
