@@ -5,12 +5,12 @@ namespace App\Controller;
 use App\Entity\Gift;
 use App\Form\GiftType;
 use App\Repository\GiftRepository;
+use App\Repository\ListeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Goutte\Client;
-use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/gift')]
 class GiftController extends AbstractController
@@ -24,22 +24,50 @@ class GiftController extends AbstractController
     }
 
     #[Route('/new', name: 'app_gift_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, GiftRepository $giftRepository): Response
+    public function new(Request $request,
+                        GiftRepository $giftRepository,
+                        ListeRepository $listeRepository): Response
     {
-        $gift = new Gift();
-        $form = $this->createForm(GiftType::class, $gift);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $giftRepository->save($gift, true);
+        $user = $this->getUser();
+        $lisetId = $request->query->get('listeId');
+        $liste = $listeRepository->find($lisetId);
 
-            return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
+
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
         }
 
-        return $this->renderForm('gift/new.html.twig', [
-            'gift' => $gift,
-            'form' => $form,
-        ]);
+        if (!$liste) {
+            // Gérer le cas où la liste n'est pas trouvée
+            // Par exemple, rediriger vers une page d'erreur
+            return $this->redirectToRoute('app_liste_new');
+        }
+
+
+        if (!$user->isIsActive()) {
+            return $this->render('resend_verif');
+        }else{
+            $gift = new Gift();
+            $gift->setListe($liste); // Associez le cadeau à la liste
+            $form = $this->createForm(GiftType::class, $gift);
+            $form->handleRequest($request);
+//            $gift->setListe($this->getlist);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $giftRepository->save($gift, true);
+
+
+                return $this->redirectToRoute('app_gift_show', [
+                    'gift'=>$gift,
+                ], Response::HTTP_SEE_OTHER);
+            }
+
+            return $this->renderForm('gift/new.html.twig', [
+                'gift' => $gift,
+                'form' => $form,
+            ]);
+        }
     }
 
     #[Route('/{id}', name: 'app_gift_show', methods: ['GET'])]

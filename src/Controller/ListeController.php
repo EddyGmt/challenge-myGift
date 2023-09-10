@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Liste;
+use App\Entity\User;
 use App\Form\ListeType;
 use App\Repository\ListeRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -26,21 +27,54 @@ class ListeController extends AbstractController
     #[Route('/new', name: 'app_liste_new', methods: ['GET', 'POST'])]
     public function new(Request $request, ListeRepository $listeRepository): Response
     {
-        $liste = new Liste();
-        $form = $this->createForm(ListeType::class, $liste);
-        $form->handleRequest($request);
+        $user = $this->getUser();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $listeRepository->save($liste, true);
-
-            return $this->redirectToRoute('app_liste_index', [], Response::HTTP_SEE_OTHER);
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
         }
 
-        return $this->renderForm('liste/new.html.twig', [
-            'liste' => $liste,
-            'form' => $form,
+        if (!$user->isIsActive()) {
+            return $this->render('resend_verif');
+        } else {
+            $liste = new Liste();
+            $form = $this->createForm(ListeType::class, $liste);
+            $form->handleRequest($request);
+
+            $dateOuverture = $liste->setDateOuveture(new \DateTime());
+            $liste->setUserId($this->getUser());
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $listeRepository->save($liste, true);
+
+                return $this->redirectToRoute('app_liste_index', [], Response::HTTP_SEE_OTHER);
+            }
+
+            return $this->renderForm('liste/new.html.twig', [
+                'liste' => $liste,
+                'form' => $form,
+            ]);
+        }
+    }
+
+    //TODO: faire une methode permettant de trouver les listes en fonction de l'user de création
+    //TODO faire apparaitre les gifts qui lui sont attribué également
+    #[Route('/mes-listes', name: 'app_my_list', methods:['GET'])]
+    public function myList(Request $request, ): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $listes = $user->getListeId();
+
+        return $this->render('liste/mylist.html.twig',[
+           'listes'=>$listes,
         ]);
     }
+
+    //TODO faire une méthode permettant d'archiver les listes
+
 
     #[Route('/{id}', name: 'app_liste_show', methods: ['GET'])]
     public function show(Liste $liste): Response
@@ -71,7 +105,7 @@ class ListeController extends AbstractController
     #[Route('/{id}', name: 'app_liste_delete', methods: ['POST'])]
     public function delete(Request $request, Liste $liste, ListeRepository $listeRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$liste->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $liste->getId(), $request->request->get('_token'))) {
             $listeRepository->remove($liste, true);
         }
 

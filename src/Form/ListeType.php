@@ -18,8 +18,8 @@ class ListeType extends AbstractType
             ->add('theme')
             ->add('status')
             ->add('password')
-            ->add('date_ouveture')
-            ->add('date_fin_ouverture')
+//            ->add('date_ouveture')
+//            ->add('date_fin_ouverture')
         ;
     }
 

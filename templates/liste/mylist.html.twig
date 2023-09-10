@@ -1,0 +1,16 @@
+{% extends './base.html.twig' %}
+{% block title %} Mes listes de cadeaux {% endblock %}
+
+{% block body %}
+    {% if listes is empty %}
+        <p>Vous n'avez pas encore créé de listes de cadeaux.</p>
+    {% else %}
+        <ul>
+            {% for liste in listes %}
+                <li>
+                    <a href="{{ path('app_liste_show', {'id': liste.id}) }}">{{ liste.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
