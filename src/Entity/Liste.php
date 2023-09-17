@@ -46,6 +46,12 @@ class Liste
     #[ORM\ManyToOne(inversedBy: 'listeId')]
     private ?User $userId = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isArchived = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isPrivate = null;
+
     public function __construct()
     {
         $this->giftId = new ArrayCollection();
@@ -190,6 +196,30 @@ class Liste
     public function setUserId(?User $userId): static
     {
         $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function isIsArchived(): ?bool
+    {
+        return $this->isArchived;
+    }
+
+    public function setIsArchived(?bool $isArchived): static
+    {
+        $this->isArchived = $isArchived;
+
+        return $this;
+    }
+
+    public function isIsPrivate(): ?bool
+    {
+        return $this->isPrivate;
+    }
+
+    public function setIsPrivate(?bool $isPrivate): static
+    {
+        $this->isPrivate = $isPrivate;
 
         return $this;
     }

@@ -4,6 +4,7 @@
 {% block body %}
     {% if listes is empty %}
         <p>Vous n'avez pas encore créé de listes de cadeaux.</p>
+        <p><a href="{{ path('app_liste_new') }}">Ajouter votre liste ici</a></p>
     {% else %}
         <ul>
             {% for liste in listes %}
@@ -12,5 +13,6 @@
                 </li>
             {% endfor %}
         </ul>
+        <p><a href="{{ path('app_liste_new') }}">Ajouter une nouvelle liste</a></p>
     {% endif %}
 {% endblock %}

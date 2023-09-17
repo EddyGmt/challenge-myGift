@@ -51,9 +51,9 @@
     <a href="{{ path('app_liste_edit', {'id': liste.id}) }}">edit</a>
 
     {{ include('liste/_delete_form.html.twig') }}
-    <a href="{{ path('app_gift_new') }}">Ajouter un nouveau cadeau</a>
+    <a href="{{ path('create_gift', {'listeId': liste.id}) }}">Ajouter un nouveau cadeau</a>
 
 
-    <a href="{{ path('app_gift_new') }}">Ajouter un nouveau cadeau</a>
+{#    <a href="{{ path('app_gift_new') }}">Ajouter un nouveau cadeau</a>#}
 
 {% endblock %}

@@ -8,6 +8,7 @@ use App\Form\ListeType;
 use App\Repository\ListeRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Compiler\ResolveBindingsPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -46,7 +47,7 @@ class ListeController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 $listeRepository->save($liste, true);
 
-                return $this->redirectToRoute('app_liste_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_my_list', [], Response::HTTP_SEE_OTHER);
             }
 
             return $this->renderForm('liste/new.html.twig', [
@@ -56,10 +57,9 @@ class ListeController extends AbstractController
         }
     }
 
-    //TODO: faire une methode permettant de trouver les listes en fonction de l'user de création
     //TODO faire apparaitre les gifts qui lui sont attribué également
     #[Route('/mes-listes', name: 'app_my_list', methods:['GET'])]
-    public function myList(Request $request, ): Response
+    public function myList(Request $request): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -74,6 +74,11 @@ class ListeController extends AbstractController
     }
 
     //TODO faire une méthode permettant d'archiver les listes
+    #[Route('archive-liste/{id}', name:'archive_liste', methods:['POST'])]
+    public function archiveListe(Request $request, $id): Response
+    {
+
+    }
 
 
     #[Route('/{id}', name: 'app_liste_show', methods: ['GET'])]
@@ -110,5 +115,26 @@ class ListeController extends AbstractController
         }
 
         return $this->redirectToRoute('app_liste_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/ajout-cadeau', name: 'app_add_gift', methods:["POST"])]
+    public function showGifts($listeId): Response
+    {
+        // Récupérez la liste spécifique par son ID
+        $liste = $this->getDoctrine()->getRepository(Liste::class)->find($listeId);
+
+        if (!$liste) {
+            // Gérer le cas où la liste n'est pas trouvée
+            // Par exemple, rediriger vers une page d'erreur
+            return $this->redirectToRoute('page_erreur');
+        }
+
+        // Récupérez les cadeaux liés à cette liste
+        $gifts = $liste->getGifts();
+
+        return $this->render('liste/show_gifts.html.twig', [
+            'liste' => $liste,
+            'gifts' => $gifts,
+        ]);
     }
 }
