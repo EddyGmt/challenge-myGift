@@ -28,6 +28,16 @@ class Gift
     #[ORM\ManyToOne(inversedBy: 'giftId')]
     private ?Liste $liste = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isReserved = null;
+
+    #[ORM\ManyToOne(inversedBy: 'giftId')]
+    private ?Reservation $reservationId = null;
+    public function __construct()
+    {
+        $this->reservations = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +99,30 @@ class Gift
     public function setListe(?Liste $liste): static
     {
         $this->liste = $liste;
+
+        return $this;
+    }
+
+    public function isIsReserved(): ?bool
+    {
+        return $this->isReserved;
+    }
+
+    public function setIsReserved(?bool $isReserved): static
+    {
+        $this->isReserved = $isReserved;
+
+        return $this;
+    }
+
+    public function getReservationId(): ?Reservation
+    {
+        return $this->reservationId;
+    }
+
+    public function setReservationId(?Reservation $reservationId): static
+    {
+        $this->reservationId = $reservationId;
 
         return $this;
     }

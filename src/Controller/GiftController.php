@@ -61,6 +61,19 @@ class GiftController extends AbstractController
         ]);
     }
 
+    #[Route('/reserve-gift/{id}', name:'reservation', methods: ['POST'])]
+    public function reserveAGift(Request $request, Gift $gift, EntityManagerInterface $entityManager): Response
+    {
+//        $isReserved = $request->get();
+        $gift->setIsReserved(true);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+
+        // Redirigez l'utilisateur vers une page de confirmation ou de détails du gift
+//        return $this->redirectToRoute('gift_details', ['id' => $gift->getId()]
+    }
+
+
     //TODO méthode pour scrapper un gift
     public function getScrapedGift(
         Request                $request,
@@ -92,8 +105,43 @@ class GiftController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}', name: 'app_gift_show', methods: ['GET'])]
+    public function show(Gift $gift): Response
+    {
+        return $this->render('gift/show.html.twig', [
+            'gift' => $gift,
+        ]);
+    }
 
-//    #[Route('/new', name: 'app_gift_new', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_gift_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Gift $gift, GiftRepository $giftRepository): Response
+    {
+        $form = $this->createForm(GiftType::class, $gift);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $giftRepository->save($gift, true);
+
+            return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('gift/edit.html.twig', [
+            'gift' => $gift,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_gift_delete', methods: ['POST'])]
+    public function delete(Request $request, Gift $gift, GiftRepository $giftRepository): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $gift->getId(), $request->request->get('_token'))) {
+            $giftRepository->remove($gift, true);
+        }
+
+        return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    //    #[Route('/new', name: 'app_gift_new', methods: ['GET', 'POST'])]
 //    public function new(Request $request,
 //                        GiftRepository $giftRepository,
 //                        ListeRepository $listeRepository,
@@ -141,43 +189,6 @@ class GiftController extends AbstractController
 //            ]);
 //        }
 //    }
-
-
-    #[Route('/{id}', name: 'app_gift_show', methods: ['GET'])]
-    public function show(Gift $gift): Response
-    {
-        return $this->render('gift/show.html.twig', [
-            'gift' => $gift,
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_gift_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Gift $gift, GiftRepository $giftRepository): Response
-    {
-        $form = $this->createForm(GiftType::class, $gift);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $giftRepository->save($gift, true);
-
-            return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->renderForm('gift/edit.html.twig', [
-            'gift' => $gift,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_gift_delete', methods: ['POST'])]
-    public function delete(Request $request, Gift $gift, GiftRepository $giftRepository): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $gift->getId(), $request->request->get('_token'))) {
-            $giftRepository->remove($gift, true);
-        }
-
-        return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
-    }
 
 //    public function scrapGift(Request $request, Gift $gift, GiftRepository $giftRepository): Response
 //    {

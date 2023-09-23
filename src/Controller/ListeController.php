@@ -58,7 +58,7 @@ class ListeController extends AbstractController
     }
 
     //TODO faire apparaitre les gifts qui lui sont attribué également
-    #[Route('/mes-listes', name: 'app_my_list', methods:['GET'])]
+    #[Route('/mes-listes', name: 'app_my_list', methods: ['GET'])]
     public function myList(Request $request): Response
     {
         $user = $this->getUser();
@@ -68,13 +68,13 @@ class ListeController extends AbstractController
 
         $listes = $user->getListeId();
 
-        return $this->render('liste/mylist.html.twig',[
-           'listes'=>$listes,
+        return $this->render('liste/mylist.html.twig', [
+            'listes' => $listes,
         ]);
     }
 
     //TODO faire une méthode permettant d'archiver les listes
-    #[Route('archive-liste/{id}', name:'archive_liste', methods:['POST'])]
+    #[Route('archive-liste/{id}', name: 'archive_liste', methods: ['POST'])]
     public function archiveListe(Request $request, $id): Response
     {
 
@@ -84,8 +84,11 @@ class ListeController extends AbstractController
     #[Route('/{id}', name: 'app_liste_show', methods: ['GET'])]
     public function show(Liste $liste): Response
     {
+        $gift = $liste->getGiftId();
+
         return $this->render('liste/show.html.twig', [
             'liste' => $liste,
+            'gift' => $gift
         ]);
     }
 
@@ -117,10 +120,10 @@ class ListeController extends AbstractController
         return $this->redirectToRoute('app_liste_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/ajout-cadeau', name: 'app_add_gift', methods:["POST"])]
+    #[Route('/{id}/ajout-cadeau', name: 'app_add_gift', methods: ["POST"])]
     public function showGifts($listeId): Response
     {
-        // Récupérez la liste spécifique par son ID
+        // Récupérer la liste spécifique par son ID
         $liste = $this->getDoctrine()->getRepository(Liste::class)->find($listeId);
 
         if (!$liste) {
@@ -135,6 +138,27 @@ class ListeController extends AbstractController
         return $this->render('liste/show_gifts.html.twig', [
             'liste' => $liste,
             'gifts' => $gifts,
+        ]);
+    }
+
+    #[Route('/{id/share', name: 'list_share', methods: ['GET'])]
+    public function listShare(Request $request, $id): Response
+    {
+        $sentitymanager = $this->getDoctrine()->getManager();
+
+        $liste = $sentitymanager->getRepository(Liste:: class)->find($id);
+        if (!$liste) {
+            throw $this->createNotFoundException('Liste non trouvée pour l\'ID ' . $id);
+        }
+
+        // Générez un lien de partage en fonction de l'ID de la liste
+        $shareLink = $this->generateUrl('app_liste_show', [
+            'id' => $liste->getId(),
+        ], true); // true pour générer une URL absolue
+
+        return $this->render('liste/share.html.twig', [
+            'liste' => $liste,
+            'shareLink' => $shareLink,
         ]);
     }
 }
