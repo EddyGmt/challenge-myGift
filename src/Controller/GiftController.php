@@ -5,8 +5,12 @@ namespace App\Controller;
 use App\Entity\Gift;
 use App\Entity\Liste;
 use App\Form\GiftType;
+use App\Form\ReservationType;
 use App\Repository\GiftRepository;
 use App\Repository\ListeRepository;
+use App\Repository\ReservationRepository;
+use App\Service\JWTService;
+use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -61,49 +65,140 @@ class GiftController extends AbstractController
         ]);
     }
 
-    #[Route('/reserve-gift/{id}', name:'reservation', methods: ['POST'])]
-    public function reserveAGift(Request $request, Gift $gift, EntityManagerInterface $entityManager): Response
+    //TODO effectuer une resa
+    #[Route('/reserve-gift/{id}', name: 'reservation', methods: ['POST'])]
+    public function reserveGift(
+        Request       $request,
+        Gift          $gift,
+        Liste         $liste,
+        MailerService $mail
+    ): Response
     {
-//        $isReserved = $request->get();
-        $gift->setIsReserved(true);
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->flush();
+        // Créez une instance du formulaire de réservation
+        $form = $this->createForm(ReservationType::class, $gift);
 
-        // Redirigez l'utilisateur vers une page de confirmation ou de détails du gift
-//        return $this->redirectToRoute('gift_details', ['id' => $gift->getId()]
+        //Récupérer le créateur de la liste
+        $listeCreator = $liste->getUserId();
+        $creatorEmail = $listeCreator->getEmail();
+
+        //On génère un token propre à la reservation du gift
+        //$token = bin2hex(random_bytes(16));
+
+        $idGift = $gift->getId(); // ID du cadeau
+        $idList = $liste->getId(); // ID de la liste
+        $secretSalt = 'votre_sel_secret';
+        $token = hash('sha256', $idGift . $idList . $secretSalt);
+
+
+        // Traitez la soumission du formulaire
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Enregistrez les modifications dans la base de données
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
+            $formData = $form->getData();
+
+            $gift->setIsReserved(true);
+            $name = $gift->setReservedBy($formData['Name']);
+            $email = $gift->setEmailReservation($formData['Email']);
+            $giftToken = $gift->setToken($token);
+
+            //Envoie de l'email à celui qui reservé le gift
+            $mail->send(
+                'eddygomet@gmail.com',
+                $email,
+                'Réservation prise en compte',
+                'reservationUser',
+                compact('gift', 'name', 'giftToken')
+            );
+
+            //mail à envoyer au créateur de la liste
+            $mail->send(
+                'eddygomet@gmail.com',
+                $creatorEmail,
+                'Réservation d\'un de vos gifts',
+                'reservationCreator',
+                compact('gift')
+            );
+
+            // Redirigez l'utilisateur vers une page de confirmation
+            return $this->redirectToRoute('confirmation_page');
+        }
+
+        // Affichez le formulaire
+        return $this->render('gift/reserve.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    //TODO se désabo d'une resa
+    #[Route('/cancel-reservation/{token}', name: 'cancel_reservation', methods: ['POST'])]
+    public function cancelReservation
+    (
+        Request                $request,
+        EntityManagerInterface $em,
+                               $token,
+        Gift                   $gift
+    ): Response
+    {
+        // Recherchez le cadeau dans la base de données en utilisant le token
+        $entityManager = $this->getDoctrine()->getManager();
+        $gift = $entityManager->getRepository(Gift::class)->findOneBy(['token' => $token]);
+
+        if (!$gift) {
+            // Le cadeau n'a pas été trouvé, redirigez vers une page d'erreur ou affichez un message approprié
+            throw $this->createNotFoundException('Cadeau non trouvé');
+        }
+
+        if ($gift) {
+            $giftToken = $gift->getToken(); // Supposons que la méthode pour obtenir le token est getToken() dans votre classe Gift
+
+            if ($token === $giftToken) {
+                // Les tokens correspondent, vous pouvez effectuer les opérations nécessaires
+                $name = $gift->setReservedBy(null);
+                $email = $gift->setEmailReservation(null);
+                $email = $gift->setToken(null);
+            } else {
+                return dd('No matching Token');
+            }
+        } else {
+            return dd('Cadeau introuvable');
+        }
+
+        return $this->redirectToRoute('confirmation_page');
     }
 
 
     //TODO méthode pour scrapper un gift
-    public function getScrapedGift(
-        Request                $request,
-                               $listeId,
-        EntityManagerInterface $entityManager,
-        GiftRepository         $giftRepository
-    ): Response
-    {
-        //On récupère le lien qui sera notre requete
-        $link = $request->request->get('link'); // Récupère le lien depuis le formulaire
-        $client = new Client();
-        $crawler = $client->request('GET', $link);
-
-        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
-        $name = $crawler->filter('name')->text();
-        $description = $crawler->filter('description')->text();
-        $image = $crawler->filter('img')->text();
-        $price = $crawler->filter('price')->text();
-
-        $gift = new Gift();
-        $gift->setImage($image);
-        $gift->setName($name);
-        $gift->setPrice($price);
-        $gift->setImage($image);
-
-        return $this->renderForm('gift/create_gift.html.twig', [
-            'gift' => $gift,
-            'form' => $form,
-        ]);
-    }
+//    public function getScrapedGift(
+//        Request                $request,
+//        EntityManagerInterface $entityManager,
+//        GiftRepository         $giftRepository
+//    ): Response
+//    {
+//        //On récupère le lien qui sera notre requete
+//        $link = $request->request->get('link'); // Récupère le lien depuis le formulaire
+//        $client = new Client();
+//        $crawler = $client->request('GET', $link);
+//
+//        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
+//        $name = $crawler->filter('name')->text();
+//        $description = $crawler->filter('description')->text();
+//        $image = $crawler->filter('img')->text();
+//        $price = $crawler->filter('price')->text();
+//
+//        $gift = new Gift();
+//        $gift->setImage($image);
+//        $gift->setName($name);
+//        $gift->setPrice($price);
+//        $gift->setImage($image);
+//
+//        return $this->renderForm('gift/create_gift.html.twig', [
+//            'gift' => $gift,
+//            'form' => $form,
+//        ]);
+//    }
 
     #[Route('/{id}', name: 'app_gift_show', methods: ['GET'])]
     public function show(Gift $gift): Response

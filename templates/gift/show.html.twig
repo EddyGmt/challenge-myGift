@@ -30,6 +30,20 @@
         </tbody>
     </table>
 
+{#    <h2>Réserver ce cadeau</h2>#}
+{#    {{ form_start(reservationForm.Name) }}#}
+{#    {{ form_widget(reservationForm.Email) }}#}
+{#    <button type="submit">Réserver</button>#}
+{#    {{ form_end(reservationForm) }}#}
+
+{#    {{ form_errors(reservationForm) }}#}
+
+{#    {{ form_start(reservationForm.Name) }}#}
+{#    {{ form_widget(reservationForm.Email) }}#}
+
+{#    <button type="submit" class="btn">Réserver</button>#}
+{#    {{ form_end(reservationForm) }}#}
+
     <a href="{{ path('app_gift_index') }}">back to list</a>
 
     <a href="{{ path('app_gift_edit', {'id': gift.id}) }}">edit</a>

@@ -33,6 +33,16 @@ class Gift
 
     #[ORM\ManyToOne(inversedBy: 'giftId')]
     private ?Reservation $reservationId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ReservedBy = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $EmailReservation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $Token = null;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
@@ -123,6 +133,42 @@ class Gift
     public function setReservationId(?Reservation $reservationId): static
     {
         $this->reservationId = $reservationId;
+
+        return $this;
+    }
+
+    public function getReservedBy(): ?string
+    {
+        return $this->ReservedBy;
+    }
+
+    public function setReservedBy(?string $ReservedBy): static
+    {
+        $this->ReservedBy = $ReservedBy;
+
+        return $this;
+    }
+
+    public function getEmailReservation(): ?string
+    {
+        return $this->EmailReservation;
+    }
+
+    public function setEmailReservation(?string $EmailReservation): static
+    {
+        $this->EmailReservation = $EmailReservation;
+
+        return $this;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->Token;
+    }
+
+    public function setToken(string $Token): static
+    {
+        $this->Token = $Token;
 
         return $this;
     }
