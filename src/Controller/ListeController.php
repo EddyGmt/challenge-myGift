@@ -161,4 +161,21 @@ class ListeController extends AbstractController
             'shareLink' => $shareLink,
         ]);
     }
+
+    #[Route('/{id}/archive-live', name: 'archive_liste', methods:['POST'])]
+    public function archiveList(Request $request, Liste $liste):Response
+    {
+        $liste->setIsArchived(true);
+
+        // Enregistrez les modifications en base de données
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+
+        return $this->redirectToRoute('liste/mylist.html.twig');
+
+//        return render('liste/archive.html.twig',[
+//
+//        ]);
+
+    }
 }

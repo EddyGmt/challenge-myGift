@@ -4,46 +4,72 @@
 
 {% block body %}
     <h1>Gift</h1>
-
     <table class="table">
         <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ gift.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ gift.name }}</td>
-            </tr>
-            <tr>
-                <th>Price</th>
-                <td>{{ gift.price }}</td>
-            </tr>
-            <tr>
-                <th>Image</th>
-                <td>{{ gift.image }}</td>
-            </tr>
-            <tr>
-                <th>Link</th>
-                <td>{{ gift.link }}</td>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <td>{{ gift.id }}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>{{ gift.name }}</td>
+        </tr>
+        <tr>
+            <th>Price</th>
+            <td>{{ gift.price }}</td>
+        </tr>
+        <tr>
+            <th>Image</th>
+            <td>{{ gift.image }}</td>
+        </tr>
+        <tr>
+            <th>Link</th>
+            <td>{{ gift.link }}</td>
+        </tr>
         </tbody>
     </table>
 
-{#    <h2>Réserver ce cadeau</h2>#}
-{#    {{ form_start(reservationForm.Name) }}#}
-{#    {{ form_widget(reservationForm.Email) }}#}
-{#    <button type="submit">Réserver</button>#}
-{#    {{ form_end(reservationForm) }}#}
+{#    {% if gift.isReserved is same as(true) %}#}
+{#        <h3>Cadeau déjà réservé</h3>#}
+{#    {% else %}#}
+{#        <h2>Réserver ce cadeau</h2>#}
+{#        {{ form_start(resaForm) }}#}
+{#        {{ form(resaForm.Name) }}#}
+{#        {{ form(resaForm.Email) }}#}
+{#        <button type="submit" class="btn">Réserver</button>#}
+{#        {{ form_end(resaForm) }}#}
+{#    {% endif %}#}
 
-{#    {{ form_errors(reservationForm) }}#}
 
-{#    {{ form_start(reservationForm.Name) }}#}
-{#    {{ form_widget(reservationForm.Email) }}#}
+    {#    {% if gift.isReserved is same as(true) %}#}
+{#        <h3>Cadeau déjà réservé</h3>#}
+{#    {% else %}#}
 
-{#    <button type="submit" class="btn">Réserver</button>#}
-{#    {{ form_end(reservationForm) }}#}
+{#        #}{#        <h2>Réserver ce cadeau</h2> #}
+{#        #}{#        {{ form_start(resaForm) }} #}
 
+{#        #}{#        #}{##}{# Affichez les widgets des champs du formulaire #}
+{#        #}{#        {{ form_widget(resaForm.Name) }} #}
+{#        #}{#        {{ form_widget(resaForm.Email) }} #}
+
+{#        #}{#        <button type="submit" class="btn">Réserver</button> #}
+{#        #}{#        {{ form_end(resaForm) }} #}
+{#    {% endif %}#}
+
+            {% if gift.isReserved is same as(true) %}
+                <h3>Cadeau déjà réservé</h3>
+            {% else %}
+                <form method="POST" action="{{ path('reservation_gift', {'id': gift.id}) }}">
+                    {{ csrf_token('my_csrf_token_key') }}   Utilisez une clé de jeton CSRF scalaire ici
+                    <label for="reservation_name">Votre nom</label>
+                    <input type="text" id="reservation_name" name="Name" required>
+
+                    <label for="reservation_email">Votre Email</label>
+                    <input type="email" id="reservation_email" name="Email" required>
+
+                    <button type="submit" class="btn">Réserver</button>
+                </form>
+            {% endif %}
     <a href="{{ path('app_gift_index') }}">back to list</a>
 
     <a href="{{ path('app_gift_edit', {'id': gift.id}) }}">edit</a>

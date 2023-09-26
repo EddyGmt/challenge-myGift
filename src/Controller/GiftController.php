@@ -66,70 +66,105 @@ class GiftController extends AbstractController
     }
 
     //TODO effectuer une resa
-    #[Route('/reserve-gift/{id}', name: 'reservation', methods: ['POST'])]
-    public function reserveGift(
-        Request       $request,
-        Gift          $gift,
-        Liste         $liste,
-        MailerService $mail
+    #[Route('/{id}/reserve-gift/', name: 'reservation_gift', methods: ['POST'])]
+//    public function reserveGift(
+//        Request       $request,
+//        Gift          $gift,
+//        Liste         $liste,
+//        MailerService $mail
+//    ): Response
+
+//    {
+//        //Récupérer le créateur de la liste
+//        $listeCreator = $liste->getUserId();
+//        $creatorEmail = $listeCreator->getEmail();
+//
+//        $idGift = $gift->getId(); // ID du cadeau
+////        $idList = $liste->getId(); // ID de la liste
+//        $secretSalt = 'votre_sel_secret';
+//        $token = hash('sha256', $idGift . $secretSalt);
+//
+//        // Créez une instance du formulaire de réservation
+//        $form = $this->createForm(ReservationType::class, $gift);
+//        // Traitez la soumission du formulaire
+//        $form->handleRequest($request);
+//
+//        if ($form->isSubmitted() && $form->isValid()) {
+//            // Enregistrez les modifications dans la base de données
+//            $entityManager = $this->getDoctrine()->getManager();
+//            $entityManager->flush();
+//            $formData = $form->getData();
+//
+//            $gift->setIsReserved(true);
+//            $name = $gift->setReservedBy($formData['Name']);
+//            $email = $gift->setEmailReservation($formData['Email']);
+//            $giftToken = $gift->setToken($token);
+//
+//            //Envoie de l'email à celui qui reservé le gift
+//            $mail->send(
+//                'eddygomet@gmail.com',
+//                $email,
+//                'Réservation prise en compte',
+//                'reservationUser',
+//                compact('gift', 'name', 'giftToken')
+//            );
+//
+//            //mail à envoyer au créateur de la liste
+//            $mail->send(
+//                'eddygomet@gmail.com',
+//                $creatorEmail,
+//                'Réservation d\'un de vos gifts',
+//                'reservationCreator',
+//                compact('gift')
+//            );
+//
+//            // Redirigez l'utilisateur vers une page de confirmation
+//            return $this->redirectToRoute('app_gift_show');
+//
+//        }
+//        // Affichez le formulaire
+//        return $this->render('gift/show.html.twig', [
+//            "gift" => $gift,
+//            "resaForm" => $form->createView(),
+//        ]);
+//    }
+
+        public function reserveGift(
+        Request         $request,
+        Gift            $gift,
+        ListeRepository $listeRepository,
+        MailerService   $mail
     ): Response
     {
-        // Créez une instance du formulaire de réservation
-        $form = $this->createForm(ReservationType::class, $gift);
+        // Récupérer les données du formulaire directement depuis la requête
+        $name = $request->request->get('Name');
+        $email = $request->request->get('Email');
 
-        //Récupérer le créateur de la liste
-        $listeCreator = $liste->getUserId();
-        $creatorEmail = $listeCreator->getEmail();
-
-        //On génère un token propre à la reservation du gift
-        //$token = bin2hex(random_bytes(16));
-
-        $idGift = $gift->getId(); // ID du cadeau
-        $idList = $liste->getId(); // ID de la liste
+        // Générer le token
+        $idGift = $gift->getId();
         $secretSalt = 'votre_sel_secret';
-        $token = hash('sha256', $idGift . $idList . $secretSalt);
+        $token = hash('sha256', $idGift . $secretSalt);
 
+        // Mettre à jour l'état du cadeau et les autres champs
+        $entityManager = $this->getDoctrine()->getManager();
+        $gift->setIsReserved(true);
+        $gift->setReservedBy($name);
+        $gift->setEmailReservation($email);
+        $gift->setToken($token);
+        $entityManager->flush();
 
-        // Traitez la soumission du formulaire
-        $form->handleRequest($request);
+        // Envoie de l'e-mail à l'utilisateur qui a réservé le cadeau
+        $mail->send(
+            'eddygomet@gmail.com',
+            $email,
+            'Réservation prise en compte',
+            'reservationUser',
+            compact('gift', 'name', 'token')
+        );
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Enregistrez les modifications dans la base de données
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
-            $formData = $form->getData();
+        // Redirection vers une page de confirmation ou une autre page appropriée
+        return $this->redirectToRoute('app_gift_show', ['id' => $gift->getId()]);
 
-            $gift->setIsReserved(true);
-            $name = $gift->setReservedBy($formData['Name']);
-            $email = $gift->setEmailReservation($formData['Email']);
-            $giftToken = $gift->setToken($token);
-
-            //Envoie de l'email à celui qui reservé le gift
-            $mail->send(
-                'eddygomet@gmail.com',
-                $email,
-                'Réservation prise en compte',
-                'reservationUser',
-                compact('gift', 'name', 'giftToken')
-            );
-
-            //mail à envoyer au créateur de la liste
-            $mail->send(
-                'eddygomet@gmail.com',
-                $creatorEmail,
-                'Réservation d\'un de vos gifts',
-                'reservationCreator',
-                compact('gift')
-            );
-
-            // Redirigez l'utilisateur vers une page de confirmation
-            return $this->redirectToRoute('confirmation_page');
-        }
-
-        // Affichez le formulaire
-        return $this->render('gift/reserve.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 
     //TODO se désabo d'une resa
