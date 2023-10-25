@@ -5,18 +5,16 @@ namespace App\Controller;
 use App\Entity\Gift;
 use App\Entity\Liste;
 use App\Form\GiftType;
-use App\Form\ReservationType;
 use App\Repository\GiftRepository;
 use App\Repository\ListeRepository;
-use App\Repository\ReservationRepository;
-use App\Service\JWTService;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Goutte\Client;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 
 #[Route('/gift')]
 class GiftController extends AbstractController
@@ -133,7 +131,8 @@ class GiftController extends AbstractController
         Request         $request,
         Gift            $gift,
         ListeRepository $listeRepository,
-        MailerService   $mail
+        MailerService   $mail,
+        ManagerRegistry $doctrine
     ): Response
     {
         // Récupérer les données du formulaire directement depuis la requête
@@ -146,7 +145,8 @@ class GiftController extends AbstractController
         $token = hash('sha256', $idGift . $secretSalt);
 
         // Mettre à jour l'état du cadeau et les autres champs
-        $entityManager = $this->getDoctrine()->getManager();
+//        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager = $doctrine->getManager();
         $gift->setIsReserved(true);
         $gift->setReservedBy($name);
         $gift->setEmailReservation($email);
