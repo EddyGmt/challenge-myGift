@@ -73,12 +73,53 @@ class ListeController extends AbstractController
         ]);
     }
 
-    //TODO faire une méthode permettant d'archiver les listes
+
     #[Route('archive-liste/{id}', name: 'archive_liste', methods: ['POST'])]
     public function archiveListe(Request $request, $id): Response
     {
+        $user = $this->getUser();
 
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Supposons que vous ayez une entité ListeCadeau avec une propriété isArchived.
+        $entityManager = $this->getDoctrine()->getManager();
+        $liste = $entityManager->getRepository(ListeCadeau::class)->find($id);
+
+        if (!$liste) {
+            throw $this->createNotFoundException('Liste introuvable');
+        }
+
+        $liste->setIsArchived(true);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('mes-listes-archivees');
     }
+
+    #[Route('unarchive-liste/{id}', name: 'unarchive_liste', methods: ['POST'])]
+    public function unarchiveListe(Request $request, $id): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Supposons que vous ayez une entité ListeCadeau avec une propriété isArchived.
+        $entityManager = $this->getDoctrine()->getManager();
+        $liste = $entityManager->getRepository(ListeCadeau::class)->find($id);
+
+        if (!$liste) {
+            throw $this->createNotFoundException('Liste introuvable');
+        }
+
+        $liste->setIsArchived(false);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('liste/mylist.html.twig');
+    }
+
 
 
     #[Route('/{id}', name: 'app_liste_show', methods: ['GET'])]
@@ -86,9 +127,31 @@ class ListeController extends AbstractController
     {
         $gift = $liste->getGiftId();
 
+        if($liste->isIsPrivate() === true){
+            return $this->redirectToRoute('liste/getMdpListe.html.twig');
+        }
+
         return $this->render('liste/show.html.twig', [
             'liste' => $liste,
             'gift' => $gift
+        ]);
+    }
+
+    #[Route('/get-mdp/{id}', name: 'app_mdp_list', methods: ['POST'])]
+    public function getMdp(Liste $liste, Request $request): Response
+    {
+        $gift = $liste->getGiftId();
+        $motDePasseFourni = $request->request->get('mot_de_passe');
+
+        if($request->isMethod('POST')){
+            if($motDePasseFourni === $liste->getPassword()){
+                return $this->redirectToRoute('app_liste_show', ['id'=>$liste->getId()]);
+            }else {
+                $this->addFlash('error', 'Mot de passe incorrect');
+            }
+        }
+        return $this->render('liste/getMdpListe.html.twig', [
+            'liste' => $liste,
         ]);
     }
 
@@ -162,7 +225,7 @@ class ListeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/archive-live', name: 'archive_liste', methods:['POST'])]
+    #[Route('/{id}/archive-list', name: 'archive_liste', methods:['POST'])]
     public function archiveList(Request $request, Liste $liste):Response
     {
         $liste->setIsArchived(true);

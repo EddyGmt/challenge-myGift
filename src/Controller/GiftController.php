@@ -14,7 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\Bundle\DoctrineBundle\Registry;
 
 #[Route('/gift')]
 class GiftController extends AbstractController
@@ -63,71 +62,8 @@ class GiftController extends AbstractController
         ]);
     }
 
-    //TODO effectuer une resa
-    #[Route('/{id}/reserve-gift/', name: 'reservation_gift', methods: ['POST'])]
-//    public function reserveGift(
-//        Request       $request,
-//        Gift          $gift,
-//        Liste         $liste,
-//        MailerService $mail
-//    ): Response
 
-//    {
-//        //Récupérer le créateur de la liste
-//        $listeCreator = $liste->getUserId();
-//        $creatorEmail = $listeCreator->getEmail();
-//
-//        $idGift = $gift->getId(); // ID du cadeau
-////        $idList = $liste->getId(); // ID de la liste
-//        $secretSalt = 'votre_sel_secret';
-//        $token = hash('sha256', $idGift . $secretSalt);
-//
-//        // Créez une instance du formulaire de réservation
-//        $form = $this->createForm(ReservationType::class, $gift);
-//        // Traitez la soumission du formulaire
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            // Enregistrez les modifications dans la base de données
-//            $entityManager = $this->getDoctrine()->getManager();
-//            $entityManager->flush();
-//            $formData = $form->getData();
-//
-//            $gift->setIsReserved(true);
-//            $name = $gift->setReservedBy($formData['Name']);
-//            $email = $gift->setEmailReservation($formData['Email']);
-//            $giftToken = $gift->setToken($token);
-//
-//            //Envoie de l'email à celui qui reservé le gift
-//            $mail->send(
-//                'eddygomet@gmail.com',
-//                $email,
-//                'Réservation prise en compte',
-//                'reservationUser',
-//                compact('gift', 'name', 'giftToken')
-//            );
-//
-//            //mail à envoyer au créateur de la liste
-//            $mail->send(
-//                'eddygomet@gmail.com',
-//                $creatorEmail,
-//                'Réservation d\'un de vos gifts',
-//                'reservationCreator',
-//                compact('gift')
-//            );
-//
-//            // Redirigez l'utilisateur vers une page de confirmation
-//            return $this->redirectToRoute('app_gift_show');
-//
-//        }
-//        // Affichez le formulaire
-//        return $this->render('gift/show.html.twig', [
-//            "gift" => $gift,
-//            "resaForm" => $form->createView(),
-//        ]);
-//    }
-
-        public function reserveGift(
+    public function reserveGift(
         Request         $request,
         Gift            $gift,
         ListeRepository $listeRepository,
@@ -135,6 +71,14 @@ class GiftController extends AbstractController
         ManagerRegistry $doctrine
     ): Response
     {
+        $liste = $gift->getListe();
+
+        // Vérifier si la liste est archivée
+        if ($liste->isIsArchived()) {
+            // Si la liste est archivée, vous pouvez rediriger l'utilisateur vers une page d'erreur ou afficher un message approprié.
+            return $this->render('liste/liste_archivee.html.twig');
+        }
+
         // Récupérer les données du formulaire directement depuis la requête
         $name = $request->request->get('Name');
         $email = $request->request->get('Email');
