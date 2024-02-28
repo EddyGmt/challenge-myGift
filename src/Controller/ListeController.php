@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Compiler\ResolveBindingsPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/liste')]
@@ -57,7 +58,6 @@ class ListeController extends AbstractController
         }
     }
 
-    //TODO faire apparaitre les gifts qui lui sont attribué également
     #[Route('/mes-listes', name: 'app_my_list', methods: ['GET'])]
     public function myList(Request $request): Response
     {
@@ -74,7 +74,7 @@ class ListeController extends AbstractController
     }
 
 
-    #[Route('archive-liste/{id}', name: 'archive_liste', methods: ['POST'])]
+    #[Route('/archive-liste/{id}', name: 'archive_liste', methods: ['POST'])]
     public function archiveListe(Request $request, $id): Response
     {
         $user = $this->getUser();
@@ -97,7 +97,7 @@ class ListeController extends AbstractController
         return $this->redirectToRoute('mes-listes-archivees');
     }
 
-    #[Route('unarchive-liste/{id}', name: 'unarchive_liste', methods: ['POST'])]
+    #[Route('/unarchive-liste/{id}', name: 'unarchive_liste', methods: ['POST'])]
     public function unarchiveListe(Request $request, $id): Response
     {
         $user = $this->getUser();
@@ -121,14 +121,13 @@ class ListeController extends AbstractController
     }
 
 
-
     #[Route('/{id}', name: 'app_liste_show', methods: ['GET'])]
     public function show(Liste $liste): Response
     {
         $gift = $liste->getGiftId();
 
-        if($liste->isIsPrivate() === true){
-            return $this->redirectToRoute('liste/getMdpListe.html.twig');
+        if ($liste->isIsPrivate()) {
+            return $this->redirectToRoute('app_mdp_list', ['id' => $liste->getId()]);
         }
 
         return $this->render('liste/show.html.twig', [
@@ -137,18 +136,19 @@ class ListeController extends AbstractController
         ]);
     }
 
-    #[Route('/get-mdp/{id}', name: 'app_mdp_list', methods: ['POST'])]
+    #[Route('/get-mdp/{id}', name: 'app_mdp_list', methods: ['GET', 'POST'])]
     public function getMdp(Liste $liste, Request $request): Response
     {
-        $gift = $liste->getGiftId();
-        $motDePasseFourni = $request->request->get('mot_de_passe');
+        if ($request->isMethod('POST')) {
+            $motDePasseFourni = $request->request->get('mot_de_passe');
 
-        if($request->isMethod('POST')){
-            if($motDePasseFourni === $liste->getPassword()){
-                return $this->redirectToRoute('app_liste_show', ['id'=>$liste->getId()]);
-            }else {
+            if ($motDePasseFourni === $liste->getPassword()) {
+                return $this->redirectToRoute('app_liste_show', ['id' => $liste->getId()]);
+            } else {
                 $this->addFlash('error', 'Mot de passe incorrect');
+                return $this->redirectToRoute('app_mdp_list', ['id' => $liste->getId()]);
             }
+
         }
         return $this->render('liste/getMdpListe.html.twig', [
             'liste' => $liste,
@@ -186,16 +186,12 @@ class ListeController extends AbstractController
     #[Route('/{id}/ajout-cadeau', name: 'app_add_gift', methods: ["POST"])]
     public function showGifts($listeId): Response
     {
-        // Récupérer la liste spécifique par son ID
         $liste = $this->getDoctrine()->getRepository(Liste::class)->find($listeId);
 
         if (!$liste) {
-            // Gérer le cas où la liste n'est pas trouvée
-            // Par exemple, rediriger vers une page d'erreur
             return $this->redirectToRoute('page_erreur');
         }
 
-        // Récupérez les cadeaux liés à cette liste
         $gifts = $liste->getGifts();
 
         return $this->render('liste/show_gifts.html.twig', [
@@ -225,8 +221,8 @@ class ListeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/archive-list', name: 'archive_liste', methods:['POST'])]
-    public function archiveList(Request $request, Liste $liste):Response
+    #[Route('/{id}/archive-list', name: 'archive_liste', methods: ['POST'])]
+    public function archiveList(Request $request, Liste $liste): Response
     {
         $liste->setIsArchived(true);
 
@@ -235,10 +231,5 @@ class ListeController extends AbstractController
         $entityManager->flush();
 
         return $this->redirectToRoute('liste/mylist.html.twig');
-
-//        return render('liste/archive.html.twig',[
-//
-//        ]);
-
     }
 }

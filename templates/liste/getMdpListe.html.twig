@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block title %} Mot de passe {% endblock %}
+{% block body %}
+    <h1 class="text-center">La liste est privée, entrez-y le mot de passe afin d'y accéder</h1>
+    <form action="{{ path('app_mdp_list', {'id': liste.id}) }}" method="post">
+        <input type="password" placeholder="Mot de passe" name="mot_de_passe">
+        <button type="submit">Accéder à la liste</button>
+    </form>
+    {% if app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ app.flashes('error')[0] }}
+        </div>
+    {% endif %}
+{% endblock %}

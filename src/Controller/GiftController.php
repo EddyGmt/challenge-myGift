@@ -42,7 +42,7 @@ class GiftController extends AbstractController
         }
 
         $gift = new Gift();
-        $gift->setListe($liste); // Associez le cadeau à la liste
+        $gift->setListe($liste);
         $form = $this->createForm(GiftType::class, $gift);
         $form->handleRequest($request);
 
