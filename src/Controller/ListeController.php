@@ -122,18 +122,26 @@ class ListeController extends AbstractController
 
 
     #[Route('/{id}', name: 'app_liste_show', methods: ['GET'])]
-    public function show(Liste $liste): Response
+    public function show(Liste $liste, Request $request): Response
     {
-        $gift = $liste->getGiftId();
-
-        if ($liste->isIsPrivate()) {
+        // Vérifier si la liste est privée et si un mot de passe a été fourni et est correct
+        if ($liste->isIsPrivate() && !$this->isAuthorized($request, $liste)) {
             return $this->redirectToRoute('app_mdp_list', ['id' => $liste->getId()]);
         }
+
+        $gift = $liste->getGiftId();
 
         return $this->render('liste/show.html.twig', [
             'liste' => $liste,
             'gift' => $gift
         ]);
+    }
+
+// Méthode pour vérifier si le mot de passe a été fourni et est correct
+    private function isAuthorized(Request $request, Liste $liste): bool
+    {
+        $motDePasseFourni = $request->getSession()->get('liste_'.$liste->getId().'_mdp');
+        return $motDePasseFourni === $liste->getPassword();
     }
 
     #[Route('/get-mdp/{id}', name: 'app_mdp_list', methods: ['GET', 'POST'])]
@@ -143,17 +151,19 @@ class ListeController extends AbstractController
             $motDePasseFourni = $request->request->get('mot_de_passe');
 
             if ($motDePasseFourni === $liste->getPassword()) {
+                // Stocker le mot de passe dans la session pour les futures vérifications
+                $request->getSession()->set('liste_'.$liste->getId().'_mdp', $motDePasseFourni);
                 return $this->redirectToRoute('app_liste_show', ['id' => $liste->getId()]);
             } else {
                 $this->addFlash('error', 'Mot de passe incorrect');
-                return $this->redirectToRoute('app_mdp_list', ['id' => $liste->getId()]);
             }
-
         }
+
         return $this->render('liste/getMdpListe.html.twig', [
             'liste' => $liste,
         ]);
     }
+
 
     #[Route('/{id}/edit', name: 'app_liste_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Liste $liste, ListeRepository $listeRepository): Response
