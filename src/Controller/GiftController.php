@@ -62,7 +62,7 @@ class GiftController extends AbstractController
         ]);
     }
 
-
+    #[Route('reserve-gift/{id}', name: 'reservation_gift', methods: 'POST')]
     public function reserveGift(
         Request         $request,
         Gift            $gift,
@@ -76,7 +76,7 @@ class GiftController extends AbstractController
         // Vérifier si la liste est archivée
         if ($liste->isIsArchived()) {
             // Si la liste est archivée, vous pouvez rediriger l'utilisateur vers une page d'erreur ou afficher un message approprié.
-            return $this->render('liste/liste_archivee.html.twig');
+            return $this->render('liste/liste_archive.html.twig');
         }
 
         // Récupérer les données du formulaire directement depuis la requête
