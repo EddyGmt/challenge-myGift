@@ -6,6 +6,7 @@ use App\Entity\Liste;
 use App\Entity\User;
 use App\Form\ListeType;
 use App\Repository\ListeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Compiler\ResolveBindingsPass;
@@ -44,6 +45,7 @@ class ListeController extends AbstractController
 
             $dateOuverture = $liste->setDateOuveture(new \DateTime());
             $liste->setUserId($this->getUser());
+            $liste->setIsArchived(false);
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $listeRepository->save($liste, true);
@@ -66,58 +68,13 @@ class ListeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $listes = $user->getListeId();
+        $listes = $user->getListeId()->filter(function ($liste) {
+            return !$liste->isIsArchived();
+        });
 
         return $this->render('liste/mylist.html.twig', [
             'listes' => $listes,
         ]);
-    }
-
-
-    #[Route('/archive-liste/{id}', name: 'archive_liste', methods: ['POST'])]
-    public function archiveListe(Request $request, $id): Response
-    {
-        $user = $this->getUser();
-
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
-
-        // Supposons que vous ayez une entité ListeCadeau avec une propriété isArchived.
-        $entityManager = $this->getDoctrine()->getManager();
-        $liste = $entityManager->getRepository(ListeCadeau::class)->find($id);
-
-        if (!$liste) {
-            throw $this->createNotFoundException('Liste introuvable');
-        }
-
-        $liste->setIsArchived(true);
-        $entityManager->flush();
-
-        return $this->redirectToRoute('mes-listes-archivees');
-    }
-
-    #[Route('/unarchive-liste/{id}', name: 'unarchive_liste', methods: ['POST'])]
-    public function unarchiveListe(Request $request, $id): Response
-    {
-        $user = $this->getUser();
-
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
-
-        // Supposons que vous ayez une entité ListeCadeau avec une propriété isArchived.
-        $entityManager = $this->getDoctrine()->getManager();
-        $liste = $entityManager->getRepository(ListeCadeau::class)->find($id);
-
-        if (!$liste) {
-            throw $this->createNotFoundException('Liste introuvable');
-        }
-
-        $liste->setIsArchived(false);
-        $entityManager->flush();
-
-        return $this->redirectToRoute('liste/mylist.html.twig');
     }
 
 
@@ -140,7 +97,7 @@ class ListeController extends AbstractController
 // Méthode pour vérifier si le mot de passe a été fourni et est correct
     private function isAuthorized(Request $request, Liste $liste): bool
     {
-        $motDePasseFourni = $request->getSession()->get('liste_'.$liste->getId().'_mdp');
+        $motDePasseFourni = $request->getSession()->get('liste_' . $liste->getId() . '_mdp');
         return $motDePasseFourni === $liste->getPassword();
     }
 
@@ -152,7 +109,7 @@ class ListeController extends AbstractController
 
             if ($motDePasseFourni === $liste->getPassword()) {
                 // Stocker le mot de passe dans la session pour les futures vérifications
-                $request->getSession()->set('liste_'.$liste->getId().'_mdp', $motDePasseFourni);
+                $request->getSession()->set('liste_' . $liste->getId() . '_mdp', $motDePasseFourni);
                 return $this->redirectToRoute('app_liste_show', ['id' => $liste->getId()]);
             } else {
                 $this->addFlash('error', 'Mot de passe incorrect');
@@ -163,7 +120,6 @@ class ListeController extends AbstractController
             'liste' => $liste,
         ]);
     }
-
 
     #[Route('/{id}/edit', name: 'app_liste_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Liste $liste, ListeRepository $listeRepository): Response
@@ -214,8 +170,8 @@ class ListeController extends AbstractController
     public function listShare(Request $request, $id): Response
     {
         $sentitymanager = $this->getDoctrine()->getManager();
-
         $liste = $sentitymanager->getRepository(Liste:: class)->find($id);
+
         if (!$liste) {
             throw $this->createNotFoundException('Liste non trouvée pour l\'ID ' . $id);
         }
@@ -223,7 +179,7 @@ class ListeController extends AbstractController
         // Générez un lien de partage en fonction de l'ID de la liste
         $shareLink = $this->generateUrl('app_liste_show', [
             'id' => $liste->getId(),
-        ], true); // true pour générer une URL absolue
+        ], true);
 
         return $this->render('liste/share.html.twig', [
             'liste' => $liste,
@@ -231,15 +187,85 @@ class ListeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/archive-list', name: 'archive_liste', methods: ['POST'])]
-    public function archiveList(Request $request, Liste $liste): Response
+    #[Route('/archive-liste/{id}', name: 'archive_liste', methods: ['POST', 'GET'])]
+    public function archiveListe(Request $request, $id, EntityManagerInterface $entityManager, ListeRepository $listeRepository): Response
     {
-        $liste->setIsArchived(true);
+        $user = $this->getUser();
 
-        // Enregistrez les modifications en base de données
-        $entityManager = $this->getDoctrine()->getManager();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Utilisation du repository injecté
+        $liste = $listeRepository->find($id);
+
+        if (!$liste) {
+            throw $this->createNotFoundException('Liste introuvable');
+        }
+
+        $liste->setIsArchived(true);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('liste/myArchivedList.html.twig');
+    }
+
+    #[Route('/unarchive-liste/{id}', name: 'unarchive_liste', methods: ['POST'])]
+    public function unarchiveListe(Request $request, $id, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Supposons que vous ayez une entité ListeCadeau avec une propriété isArchived.
+        //$entityManager = $this->getDoctrine()->getManager();
+        $liste = $entityManager->getRepository(ListeCadeau::class)->find($id);
+
+        if (!$liste) {
+            throw $this->createNotFoundException('Liste introuvable');
+        }
+
+        $liste->setIsArchived(false);
         $entityManager->flush();
 
         return $this->redirectToRoute('liste/mylist.html.twig');
     }
+
+/*    #[Route('/mes-listes-archivees', name: 'my_archived_list', methods: ['GET'])]
+    public function myArchivedList(Request $request): Response
+    {
+        $user = $this->getUser();
+
+        if(!$user){
+            return $this->redirectToRoute('app_login');
+        }
+
+        $listes = $user->getListeId()->filter(function ($liste) {
+            return $liste->isIsArchived();
+        });
+
+        return $this->render('liste/myArchivedList.html.twig', [
+            'listes' => $listes
+        ]);
+    }*/
+
+    #[Route('/mes-listes-archivees', name: 'my_archived_list', methods: ['GET'])]
+    public function myArchivedList(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $listes = $user->getListeId()->filter(function ($liste) {
+            return $liste->isIsArchived();
+        });
+
+        return $this->render('liste/mylist.html.twig', [
+            'listes' => $listes,
+        ]);
+    }
+
+
 }

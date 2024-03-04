@@ -10,8 +10,11 @@ Encore
     .enableSourceMaps(!Encore.isProduction())
     .enableSingleRuntimeChunk()
     .enableSassLoader()
-    .addAliases({
-        '@symfony/stimulus-bridge/controllers.json': path.resolve(__dirname, 'node_modules', '@symfony', 'stimulus-bridge', 'dist', 'controllers.json'),
-    });
+    .enableStimulusBridge(
+        './assets/controllers.json'
+    )
+/*    .addAliases({
+        '@symfony/stimulus-bridge/controllers.json': path.resolve(__dirname, 'node_modules', '@symfony', 'stimulus-bridge', 'controllers.json'),
+    });*/
 
 module.exports = Encore.getWebpackConfig();

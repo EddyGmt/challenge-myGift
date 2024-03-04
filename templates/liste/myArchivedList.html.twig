@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Mes listes archivées {% endblock %}
+            {% for liste in listes %}
+                <li>
+                    <a>{{ liste.title }}</a>
+                </li>
+            {% endfor %}
+{% endblock %}
