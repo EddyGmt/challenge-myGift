@@ -8,12 +8,6 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ path('app_user_show', {"id": app.user.id }) }}">
-                            Mon Profil<span class="sr-only">(current)</span></a>
-                    </li>
-                {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('app_liste_index') }})">Les Listes de cadeaux</a>
@@ -25,9 +19,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Contacts</a>
                 </li>
+            </ul>
+            <ul class="navbar-nav m-block">
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{{ path('app_user_show', {"id": app.user.id }) }}">
+                            <i class="fa-solid fa-user"></i></a>
+                    </li>
+                {% endif %}
                 {% if app.user %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_logout') }}" tabindex="-1">Déconnexion</a>
+                        <a class="nav-link" href="{{ path('app_logout') }}" tabindex="-1">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </a>
                     </li>
                 {% else %}
                     <li class="nav-item">

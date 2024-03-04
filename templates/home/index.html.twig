@@ -4,15 +4,14 @@
 
 {% block body %}
 
-<div class="mh-100">
-    <h1 class="text-center">Bienvenue sur MyGift</h1>
-{#    <img class="" src="{{ asset('images/logoMyGift.png') }}" height="300" alt="Logo My Gift">#}
-    <div class="parallax-section">
-        <div class="container-fluid">
-            <h1>Mon effet de parallaxe</h1>
-            <p>Ceci est une section parallaxe créée avec Bootstrap.</p>
+    <div class="mh-100">
+        <div class="parallax-section">
+            <h1 class="text-center">Bienvenue sur MyGift</h1>
+            <div class="container-fluid">
+                <a href="{{ path('app_liste_new') }}" type="button" class="p-3 btn-home">
+                    Créer votre première liste
+                </a>
+            </div>
         </div>
     </div>
-
-</div>
 {% endblock %}

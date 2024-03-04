@@ -12,8 +12,8 @@ body {
 }
 
 .parallax-section {
-  //background-image: {{ asset('images/logoMyGift.png') }};
-  background-image: url('https://img.freepik.com/psd-gratuit/banniere-pour-black-friday-boite-cadeau-noire-ruban-dore-texte-fond-sombre_125540-4681.jpghttps://img.freepik.com/psd-gratuit/banniere-pour-black-friday-boite-cadeau-noire-ruban-dore-texte-fond-sombre_125540-4681.jpg');
+  background-image: url('../../public/images/logoMyGift.png');
+  //background-image: url('https://img.freepik.com/psd-gratuit/banniere-pour-black-friday-boite-cadeau-noire-ruban-dore-texte-fond-sombre_125540-4681.jpghttps://img.freepik.com/psd-gratuit/banniere-pour-black-friday-boite-cadeau-noire-ruban-dore-texte-fond-sombre_125540-4681.jpg');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
