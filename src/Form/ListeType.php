@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class ListeType extends AbstractType
 {
@@ -29,11 +30,11 @@ class ListeType extends AbstractType
                 ],
                 'label'=>'Description'
             ])
-            ->add('cover', FileType::class,[
+            ->add('imageFile', VichImageType::class,[
                 'attr'=>[
                     'class'=>''
                 ],
-                'label'=>'Cover'
+                'label'=>'Couverture de la liste'
             ])
             ->add('theme',TextType::class,[
                 'attr'=>[
@@ -45,13 +46,8 @@ class ListeType extends AbstractType
                 'attr'=>[
                     'class'=>''
                 ],
-                'label'=>'Voulez-vous que la liste soit privée?'
-            ])
-            ->add('status', NumberType::class,[
-                'attr'=>[
-                    'class'=>''
-                ],
-                'label'=>'Status'
+                'label'=>'Voulez-vous que la liste soit privée?',
+                'required'=>'false'
             ])
             ->add('password', PasswordType::class,[
                 'attr'=>[
@@ -59,8 +55,6 @@ class ListeType extends AbstractType
                 ],
                 'label'=>'Mot de passe'
             ])
-//            ->add('date_ouveture')
-//            ->add('date_fin_ouverture')
         ;
     }
 

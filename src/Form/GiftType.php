@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType; // Utilisez TextType ic
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichImageType;
+
 class GiftType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -26,7 +28,7 @@ class GiftType extends AbstractType
                 ],
                 'label'=>'Prix'
             ])
-            ->add('image', FileType::class,[
+            ->add('imageFile', VichImageType::class,[
                 'attr'=>[
                     'class'=>''
                 ],

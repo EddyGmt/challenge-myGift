@@ -3,24 +3,24 @@
 {% block title %}Liste{% endblock %}
 
 {% block body %}
-    <h1>Liste</h1>
+    <h1 class="text-center mt-2">{{ liste.title }}</h1>
 
     <h2>Lien de partage :</h2>
     <p><a href="{{ path('list_share', {'id': liste.id}) }}">Partager cette liste</a></p>
 
     <table class="table">
         <tbody>
-        <tr>
+{#        <tr>
             <th>Title</th>
             <td>{{ liste.title }}</td>
-        </tr>
+        </tr>#}
         <tr>
             <th>Description</th>
             <td>{{ liste.description }}</td>
         </tr>
         <tr>
             <th>Cover</th>
-            <td>{{ liste.cover }}</td>
+            <td>{{ liste.imageFile }}</td>
         </tr>
         <tr>
             <th>Theme</th>
@@ -43,7 +43,6 @@
         <table>
         <tbody>
         <thead>
-        <td>Id</td>
         <td>Name</td>
         <td>Price</td>
         <td>Image</td>
@@ -51,26 +50,24 @@
         </thead>
         {% for gift in liste.getGiftId() %}
             <tr>
-                <td>{{ gift.id }}</td>
                 <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">{{ gift.Name }}</a></td>
                 <td>{{ gift.Price }}</td>
-                <td>{{ gift.Image }}</td>
-{#                <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">Lien du cadeau</a></td>#}
+                <td>{{ gift.imageFile }}</td>
+                {#                <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">Lien du cadeau</a></td> #}
             </tr>
             </tbody>
-            </table>
             </table>
         {% endfor %}
     {% endif %}
 
-    {% if app.user is same as liste.userId  %}
+    {% if app.user is same as liste.userId %}
 
-    <a href="{{ path('app_liste_index') }}">back to list</a>
+        <a href="{{ path('app_liste_index') }}">back to list</a>
 
-    <a href="{{ path('app_liste_edit', {'id': liste.id}) }}">edit</a>
+        <a href="{{ path('app_liste_edit', {'id': liste.id}) }}">edit</a>
 
-    {{ include('liste/_delete_form.html.twig') }}
-    <a href="{{ path('create_gift', {'listeId': liste.id}) }}">Ajouter un nouveau cadeau</a>
+        {{ include('liste/_delete_form.html.twig') }}
+        <a href="{{ path('create_gift', {'listeId': liste.id}) }}">Ajouter un nouveau cadeau</a>
 
         <a href="{{ path('archive_liste', {'id': liste.id}) }}" type="button"> Archiver la liste</a>
 

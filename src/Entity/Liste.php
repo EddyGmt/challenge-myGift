@@ -7,8 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ListeRepository::class)]
+#[Vich\Uploadable]
 class Liste
 {
     #[ORM\Id]
@@ -22,17 +25,18 @@ class Liste
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $cover = null;
-
     #[ORM\Column(length: 50)]
     private ?string $theme = null;
 
-    #[ORM\Column]
-    private ?int $status = null;
-
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $password = null;
+
+    // NOTE: This is not a mapped field of entity metadata, just a simple property.
+    #[Vich\UploadableField(mapping: 'liste', fileNameProperty: 'imageName')]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $imageName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_ouveture = null;
@@ -86,18 +90,6 @@ class Liste
         return $this;
     }
 
-    public function getCover(): ?string
-    {
-        return $this->cover;
-    }
-
-    public function setCover(?string $cover): self
-    {
-        $this->cover = $cover;
-
-        return $this;
-    }
-
     public function getTheme(): ?string
     {
         return $this->theme;
@@ -106,18 +98,6 @@ class Liste
     public function setTheme(string $theme): self
     {
         $this->theme = $theme;
-
-        return $this;
-    }
-
-    public function getStatus(): ?int
-    {
-        return $this->status;
-    }
-
-    public function setStatus(int $status): self
-    {
-        $this->status = $status;
 
         return $this;
     }
@@ -132,6 +112,41 @@ class Liste
         $this->password = $password;
 
         return $this;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if (null !== $imageFile) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    /**
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the update. If this
+     * bundle's configuration parameter 'inject_on_load' is set to 'true' this setter
+     * must be able to accept an instance of 'File' as the bundle will inject one here
+     * during Doctrine hydration.
+     *
+     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $imageFile
+     */
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageName(?string $imageName): void
+    {
+        $this->imageName = $imageName;
+    }
+
+    public function getImageName(): ?string
+    {
+        return $this->imageName;
     }
 
     public function getDateOuveture(): ?\DateTimeInterface
