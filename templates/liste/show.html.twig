@@ -20,7 +20,8 @@
         </tr>
         <tr>
             <th>Cover</th>
-            <td>{{ liste.imageFile }}</td>
+            <img src="{{ vich_uploader_asset(liste, 'imageFile')}}" alt="{{ liste.imageName }}">
+{#            <td>{{ liste.imageFile }}</td>#}
         </tr>
         <tr>
             <th>Theme</th>
@@ -52,7 +53,8 @@
             <tr>
                 <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">{{ gift.Name }}</a></td>
                 <td>{{ gift.Price }}</td>
-                <td>{{ gift.imageFile }}</td>
+                <img src="{{ vich_uploader_asset(gift, 'imageFile')}}" alt="{{ gift.imageName }}">
+
                 {#                <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">Lien du cadeau</a></td> #}
             </tr>
             </tbody>

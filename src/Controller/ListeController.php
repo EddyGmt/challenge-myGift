@@ -218,7 +218,6 @@ class ListeController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Supposons que vous ayez une entité ListeCadeau avec une propriété isArchived.
         //$entityManager = $this->getDoctrine()->getManager();
         $liste = $entityManager->getRepository(ListeCadeau::class)->find($id);
 
@@ -232,40 +231,24 @@ class ListeController extends AbstractController
         return $this->redirectToRoute('liste/mylist.html.twig');
     }
 
-/*    #[Route('/mes-listes-archivees', name: 'my_archived_list', methods: ['GET'])]
-    public function myArchivedList(Request $request): Response
-    {
-        $user = $this->getUser();
-
-        if(!$user){
-            return $this->redirectToRoute('app_login');
-        }
-
-        $listes = $user->getListeId()->filter(function ($liste) {
-            return $liste->isIsArchived();
-        });
-
-        return $this->render('liste/myArchivedList.html.twig', [
-            'listes' => $listes
-        ]);
-    }*/
-
-    #[Route('/mes-listes-archivees', name: 'my_archived_list', methods: ['GET'])]
-    public function myArchivedList(Request $request): Response
+    #[Route('/ma-liste-archivee/{id}', name: 'my_archived_list', methods: ['GET'])]
+    public function myArchivedList(Liste $liste, Request $request): Response
     {
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
-        $listes = $user->getListeId()->filter(function ($liste) {
-            return $liste->isIsArchived();
-        });
+        if ($liste->isIsPrivate() && !$this->isAuthorized($request, $liste)) {
+            return $this->redirectToRoute('app_mdp_list', ['id' => $liste->getId()]);
+        }
 
-        return $this->render('liste/mylist.html.twig', [
-            'listes' => $listes,
+        $gift = $liste->getGiftId();
+
+        return $this->render('liste/show.html.twig', [
+            'liste' => $liste,
+            'gift' => $gift
         ]);
     }
-
 
 }

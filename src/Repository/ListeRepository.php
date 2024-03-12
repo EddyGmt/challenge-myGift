@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Liste;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<Liste>
@@ -38,6 +40,17 @@ class ListeRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    public function findArchiveList(UserInterface $user)
+    {
+        return $this->createQueryBuilder('l')
+        ->andWhere('l.user = :user')
+            ->andWhere('l.isArchived = true')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
+    }
+
 
 //    /**
 //     * @return Liste[] Returns an array of Liste objects
