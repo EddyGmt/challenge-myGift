@@ -94,7 +94,7 @@ class ListeController extends AbstractController
         ]);
     }
 
-// Méthode pour vérifier si le mot de passe a été fourni et est correct
+    // Méthode pour vérifier si le mot de passe a été fourni et est correct
     private function isAuthorized(Request $request, Liste $liste): bool
     {
         $motDePasseFourni = $request->getSession()->get('liste_' . $liste->getId() . '_mdp');
@@ -187,6 +187,7 @@ class ListeController extends AbstractController
         ]);
     }
 
+
     #[Route('/archive-liste/{id}', name: 'archive_liste', methods: ['POST', 'GET'])]
     public function archiveListe(Request $request, $id, EntityManagerInterface $entityManager, ListeRepository $listeRepository): Response
     {
@@ -206,7 +207,8 @@ class ListeController extends AbstractController
         $liste->setIsArchived(true);
         $entityManager->flush();
 
-        return $this->redirectToRoute('liste/myArchivedList.html.twig');
+        //return $this->redirectToRoute('my_archived_list');
+        return $this->redirectToRoute('all_my_archived_list');
     }
 
     #[Route('/unarchive-liste/{id}', name: 'unarchive_liste', methods: ['POST'])]
@@ -248,6 +250,23 @@ class ListeController extends AbstractController
         return $this->render('liste/show.html.twig', [
             'liste' => $liste,
             'gift' => $gift
+        ]);
+    }
+
+    #[Route('/mes-listes-archivees', name: 'all_my_archived_list', methods: ['GET'])]
+    public function allMyArchivedList(ListeRepository $listeRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $listes = $user->getListeId()->filter(function ($liste) {
+            return $liste->isIsArchived();
+        });
+
+        return $this->render('liste/allMyArchivedList.html.twig', [
+            'listes' => $listes,
         ]);
     }
 

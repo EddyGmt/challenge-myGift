@@ -10,6 +10,8 @@ use App\Repository\ListeRepository;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Goutte\Client;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -150,34 +152,39 @@ class GiftController extends AbstractController
 
 
     //TODO méthode pour scrapper un gift
-//    public function getScrapedGift(
-//        Request                $request,
-//        EntityManagerInterface $entityManager,
-//        GiftRepository         $giftRepository
-//    ): Response
-//    {
-//        //On récupère le lien qui sera notre requete
-//        $link = $request->request->get('link'); // Récupère le lien depuis le formulaire
-//        $client = new Client();
-//        $crawler = $client->request('GET', $link);
-//
-//        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
-//        $name = $crawler->filter('name')->text();
-//        $description = $crawler->filter('description')->text();
-//        $image = $crawler->filter('img')->text();
-//        $price = $crawler->filter('price')->text();
-//
-//        $gift = new Gift();
-//        $gift->setImage($image);
-//        $gift->setName($name);
-//        $gift->setPrice($price);
-//        $gift->setImage($image);
-//
-//        return $this->renderForm('gift/create_gift.html.twig', [
-//            'gift' => $gift,
-//            'form' => $form,
-//        ]);
-//    }
+    #[Route('/scrapped-gift', name:'app_scrapped', methods: ['GET', 'POST'])]
+    public function scrapGift(
+        Request                $request,
+        EntityManagerInterface $entityManager,
+        GiftRepository         $giftRepository
+    ): Response
+    {
+        //On récupère le lien qui sera notre requete
+        $link ='https://www.amazon.fr/dp/B0BWRHQZZN/ref=sspa_dk_detail_1?psc=1&pd_rd_i=B0BWRHQZZN&pd_rd_w=NCTBI&content-id=amzn1.sym.2b631440-6276-45ab-a2e4-50e8867cfe1d&pf_rd_p=2b631440-6276-45ab-a2e4-50e8867cfe1d&pf_rd_r=WBMYPF0WS7451796Q771&pd_rd_wg=e2ZvD&pd_rd_r=4316d44f-2812-40bc-a76b-ae44a5dfb578&s=videogames&sp_csd=d2lkZ2V0TmFtZT1zcF9kZXRhaWwy';
+        $client = new Client();
+        $crawler = $client->request('GET', $link);
+
+        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
+        $name = $crawler->filter('#productTitle')->text();
+        $image = $crawler->filter('#landingImage')->text();
+        $price = $crawler->filter('#corePriceDisplay_desktop_feature_div > div.a-section.a-spacing-none.aok-align-center.aok-relative > span.a-price.aok-align-center.reinventPricePriceToPayMargin.priceToPay > span:nth-child(2)')->text();
+
+        $cleanedPriceString = preg_replace("/[^0-9,.]/", "", $price);
+        $cleanedPriceString = str_replace(",", ".", $cleanedPriceString);
+        $cleanedPriceString = str_replace(" ", "", $cleanedPriceString);
+        $priceFloat = floatval($cleanedPriceString);
+
+        $gift = new Gift();
+        $gift->setImageName($image);
+        $gift->setName($name);
+        $gift->setPrice($priceFloat);
+
+/*        return $this->renderForm('gift/create_gift.html.twig', [
+            'gift' => $gift,
+            'form' => $form,
+        ]);*/
+        return dd($name, $image, $priceFloat);
+    }
 
     #[Route('/{id}', name: 'app_gift_show', methods: ['GET'])]
     public function show(Gift $gift): Response
