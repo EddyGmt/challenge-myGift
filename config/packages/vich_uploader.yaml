@@ -6,15 +6,24 @@ vich_uploader:
   mappings:
     user:
       uri_prefix: /images/user
-      upload_destination: '%kernel.project_dir%/public/images/user '
+      upload_destination: '%kernel.project_dir%/public/images/user'
       namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true
 
     liste:
       uri_prefix: /images/listes
-      upload_destination: '%kernel.project_dir%/public/images/listes '
+      upload_destination: '%kernel.project_dir%/public/images/listes'
       namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true
 
     gift:
       uri_prefix: /images/gifts
-      upload_destination: '%kernel.project_dir%/public/images/gifts '
+      upload_destination: '%kernel.project_dir%/public/images/gifts'
       namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true

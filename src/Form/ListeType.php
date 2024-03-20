@@ -34,7 +34,8 @@ class ListeType extends AbstractType
                 'attr'=>[
                     'class'=>''
                 ],
-                'label'=>'Couverture de la liste'
+                'label'=>'Couverture de la liste',
+                'download_label'=>true,
             ])
             ->add('theme',TextType::class,[
                 'attr'=>[
@@ -46,14 +47,15 @@ class ListeType extends AbstractType
                 'attr'=>[
                     'class'=>''
                 ],
-                'label'=>'Voulez-vous que la liste soit privée?',
+                'label'=>'Cochez si vous voulez que votre liste soit privée',
                 'required'=>'false'
             ])
             ->add('password', PasswordType::class,[
                 'attr'=>[
                     'class'=>''
                 ],
-                'label'=>'Mot de passe'
+                'label'=>'Mot de passe',
+                'required'=>'false'
             ])
         ;
     }

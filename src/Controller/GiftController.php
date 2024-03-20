@@ -149,26 +149,24 @@ class GiftController extends AbstractController
 
         return $this->redirectToRoute('confirmation_page');
     }
-
-
-    //TODO méthode pour scrapper un gift
-    #[Route('/scrapped-gift', name:'app_scrapped', methods: ['GET', 'POST'])]
+    
+    #[Route('/scrapped-gift', name: 'app_scrapped', methods: ['GET', 'POST'])]
     public function scrapGift(
         Request                $request,
         EntityManagerInterface $entityManager,
-        GiftRepository         $giftRepository
     ): Response
     {
         //On récupère le lien qui sera notre requete
-        $link ='https://www.amazon.fr/dp/B0BWRHQZZN/ref=sspa_dk_detail_1?psc=1&pd_rd_i=B0BWRHQZZN&pd_rd_w=NCTBI&content-id=amzn1.sym.2b631440-6276-45ab-a2e4-50e8867cfe1d&pf_rd_p=2b631440-6276-45ab-a2e4-50e8867cfe1d&pf_rd_r=WBMYPF0WS7451796Q771&pd_rd_wg=e2ZvD&pd_rd_r=4316d44f-2812-40bc-a76b-ae44a5dfb578&s=videogames&sp_csd=d2lkZ2V0TmFtZT1zcF9kZXRhaWwy';
+        $link = 'https://www.amazon.fr/Console-PlayStation-PS5-Standard-Mod%C3%A8le/dp/B0CLT54ZNZ/ref=sr_1_5?__mk_fr_FR=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=V9WZ9G7H7ZHO&dib=eyJ2IjoiMSJ9.0uXsI45rq14jRgLjebGbRSdiBNufGaJRKU65kZYrT5DI_Xc-P2TNBtteufuN6YCDhrSitxVN2hE42IllTQa4IowXrWbOT603UDD4f87ofUF7QDX0ftOmG2__LylGbYbr368vljsY8L0TfsbkbVAfupB_J2VKfLNfGPd6zDFEU33Pulm_6teVTbzBlERwPzi-fJmBKU-iFVQUE-YQazDT3J8hFsyWmSWYbJoXkSmAZtU.3FN2Ike1UtVKi4O1Be7x7ZlrCmUKYTbIwt72XcyWigM&dib_tag=se&keywords=ps5&qid=1710774539&s=videogames&sprefix=ps5%2Cvideogames%2C150&sr=1-5';
         $client = new Client();
         $crawler = $client->request('GET', $link);
 
-        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
+        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut (on se base sur Amazon pour le scrapping)
         $name = $crawler->filter('#productTitle')->text();
-        $image = $crawler->filter('#landingImage')->text();
+        $image = $crawler->filter('#landingImage')->eq(0)->attr('src');
         $price = $crawler->filter('#corePriceDisplay_desktop_feature_div > div.a-section.a-spacing-none.aok-align-center.aok-relative > span.a-price.aok-align-center.reinventPricePriceToPayMargin.priceToPay > span:nth-child(2)')->text();
 
+        //On convertit notre string en float
         $cleanedPriceString = preg_replace("/[^0-9,.]/", "", $price);
         $cleanedPriceString = str_replace(",", ".", $cleanedPriceString);
         $cleanedPriceString = str_replace(" ", "", $cleanedPriceString);
@@ -179,10 +177,10 @@ class GiftController extends AbstractController
         $gift->setName($name);
         $gift->setPrice($priceFloat);
 
-/*        return $this->renderForm('gift/create_gift.html.twig', [
-            'gift' => $gift,
-            'form' => $form,
-        ]);*/
+        /*        return $this->renderForm('gift/create_gift.html.twig', [
+                    'gift' => $gift,
+                    'form' => $form,
+                ]);*/
         return dd($name, $image, $priceFloat);
     }
 
@@ -221,77 +219,4 @@ class GiftController extends AbstractController
 
         return $this->redirectToRoute('app_gift_index', [], Response::HTTP_SEE_OTHER);
     }
-
-    //    #[Route('/new', name: 'app_gift_new', methods: ['GET', 'POST'])]
-//    public function new(Request $request,
-//                        GiftRepository $giftRepository,
-//                        ListeRepository $listeRepository,
-//                        $listeId): Response
-//    {
-//
-//        $user = $this->getUser();
-////        $listeId = $request->query->get('listeId');
-//        $liste = $listeRepository->find($listeId);
-//        $liste = $this->getDoctrine()->getRepository(Liste::class)->find($listeId);
-//
-//
-//        if (!$user) {
-//            return $this->redirectToRoute('app_login');
-//        }
-//
-//        if (!$liste) {
-//            // Gérer le cas où la liste n'est pas trouvée
-//            // Par exemple, rediriger vers une page d'erreur
-//            return $this->redirectToRoute('app_liste_new');
-//        }
-//
-//
-//        if (!$user->isIsActive()) {
-//            return $this->render('resend_verif');
-//        }else{
-//            $gift = new Gift();
-//            $gift->setListe($liste); // Associez le cadeau à la liste
-//            $form = $this->createForm(GiftType::class, $gift);
-//            $form->handleRequest($request);
-////            $gift->setListe($this->getlist);
-//
-//            if ($form->isSubmitted() && $form->isValid()) {
-//                $giftRepository->save($gift, true);
-//
-//
-//                return $this->redirectToRoute('app_gift_show', [
-//                    'gift'=>$gift,
-//                ], Response::HTTP_SEE_OTHER);
-//            }
-//
-//            return $this->renderForm('gift/new.html.twig', [
-//                'gift' => $gift,
-//                'form' => $form,
-//            ]);
-//        }
-//    }
-
-//    public function scrapGift(Request $request, Gift $gift, GiftRepository $giftRepository): Response
-//    {
-//        //On récupère le lien qui sera notre requete
-//        $link = $request->request->get('link'); // Récupère le lien depuis le formulaire
-//        $client = new Client();
-//        $crawler = $client->request('GET', $link);
-//
-//        //On filtre et récupère les infos à partir du crawler pour les mettre là où on veut
-//        $name = $crawler->filter('name')->text();
-//        $description = $crawler->filter('description')->text();
-//        $image = $crawler->filter('img')->text();
-//        $price = $crawler->filter('price')->text();
-//
-//
-//        $gift = new Gift();
-//        $gift->setImage($image);
-//        $gift->setName($name);
-//        $gift->setPrice($price);
-//        $gift->setImage($image);
-//
-//
-//        return;
-//    }
 }

@@ -87,7 +87,6 @@ class ListeController extends AbstractController
         }
 
         $gift = $liste->getGiftId();
-
         return $this->render('liste/show.html.twig', [
             'liste' => $liste,
             'gift' => $gift

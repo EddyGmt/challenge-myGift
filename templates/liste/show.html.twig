@@ -3,62 +3,40 @@
 {% block title %}Liste{% endblock %}
 
 {% block body %}
-    <h1 class="text-center mt-2">{{ liste.title }}</h1>
+    <header>
+        <div class="p-5 text-center bg-image"
+             style="background-image: url('{{ vich_uploader_asset(liste, 'imageFile') }}'); ">
+            <div class="p-5 text-center bg-body-tertiary">
+                <div class="text-white">
+                    <h1 class="mb-3">{{ liste.title }}</h1>
+                    <h2 class="mb-3">{{ liste.description }}</h2>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <h2>Lien de partage :</h2>
-    <p><a href="{{ path('list_share', {'id': liste.id}) }}">Partager cette liste</a></p>
+    <div class="d-flex">
+        <h2>Lien de partage :</h2>
+        <p><a href="{{ path('list_share', {'id': liste.id}) }}">Partager cette liste</a></p>
+    </div>
 
-    <table class="table">
-        <tbody>
-{#        <tr>
-            <th>Title</th>
-            <td>{{ liste.title }}</td>
-        </tr>#}
-        <tr>
-            <th>Description</th>
-            <td>{{ liste.description }}</td>
-        </tr>
-        <tr>
-            <th>Cover</th>
-            <img src="{{ vich_uploader_asset(liste, 'imageFile')}}" alt="{{ liste.imageName }}">
-{#            <td>{{ liste.imageFile }}</td>#}
-        </tr>
-        <tr>
-            <th>Theme</th>
-            <td>{{ liste.theme }}</td>
-        </tr>
-        <tr>
-            <th>Date_ouveture</th>
-            <td>{{ liste.dateOuveture ? liste.dateOuveture|date('Y-m-d') : '' }}</td>
-        </tr>
-        <tr>
-            <th>Date_fin_ouverture</th>
-            <td>{{ liste.dateFinOuverture ? liste.dateFinOuverture|date('Y-m-d') : '' }}</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="d-flex">
+        <p>Cette liste a été créée le {{ liste.dateOuveture ? liste.dateOuveture|date('Y-m-d') : '' }} dans le thème
+            de {{ liste.theme }}</p>
+    </div>
 
     {% if gift is empty %}
         <a href="{{ path('create_gift', {'listeId': liste.id}) }}">Ajouter vos cadeaux ici</a>
     {% else %}
-        <table>
-        <tbody>
-        <thead>
-        <td>Name</td>
-        <td>Price</td>
-        <td>Image</td>
-        <td>Accéder au cadeau</td>
-        </thead>
         {% for gift in liste.getGiftId() %}
-            <tr>
-                <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">{{ gift.Name }}</a></td>
-                <td>{{ gift.Price }}</td>
-                <img src="{{ vich_uploader_asset(gift, 'imageFile')}}" alt="{{ gift.imageName }}">
-
+                <a href="{{ path('app_gift_show', {'id': gift.id}) }}">{{ gift.Name }}</a>
+                { gift.Price }}
+                {% if gift.imageFile is defined %}
+                    <img src="{{ vich_uploader_asset(gift, 'imageFile') }}" alt="{{ gift.imageName }}">
+                {% else %}
+                    <img src="{{ gift.imageName }}" alt="{{ gift.imageName }}">
+                {% endif %}
                 {#                <td><a href="{{ path('app_gift_show', {'id': gift.id}) }}">Lien du cadeau</a></td> #}
-            </tr>
-            </tbody>
-            </table>
         {% endfor %}
     {% endif %}
 
@@ -76,4 +54,5 @@
     {% endif %}
     {#    <a href="{{ path('app_gift_new') }}">Ajouter un nouveau cadeau</a> #}
 
+    <p>{{ liste.dateFinOuverture ? 'liste close le ' + liste.dateFinOuverture|date('Y-m-d') : '' }}</p>
 {% endblock %}
