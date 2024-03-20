@@ -3,11 +3,11 @@
 {% block title %}Liste{% endblock %}
 
 {% block body %}
-    <header>
+    <header class="h-50">
         <div class="p-5 text-center bg-image"
              style="background-image: url('{{ vich_uploader_asset(liste, 'imageFile') }}'); ">
-            <div class="p-5 text-center bg-body-tertiary">
-                <div class="text-white">
+            <div class="text-center bg-body-tertiary">
+                <div>
                     <h1 class="mb-3">{{ liste.title }}</h1>
                     <h2 class="mb-3">{{ liste.description }}</h2>
                 </div>
@@ -26,11 +26,11 @@
     </div>
 
     {% if gift is empty %}
-        <a href="{{ path('create_gift', {'listeId': liste.id}) }}">Ajouter vos cadeaux ici</a>
+        <p>Votre liste est actuellement vide. <a href="{{ path('create_gift', {'listeId': liste.id}) }}">Ajouter vos cadeaux ici</a></p>
     {% else %}
         {% for gift in liste.getGiftId() %}
                 <a href="{{ path('app_gift_show', {'id': gift.id}) }}">{{ gift.Name }}</a>
-                { gift.Price }}
+                {{ gift.Price }}
                 {% if gift.imageFile is defined %}
                     <img src="{{ vich_uploader_asset(gift, 'imageFile') }}" alt="{{ gift.imageName }}">
                 {% else %}

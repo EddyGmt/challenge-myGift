@@ -32,7 +32,8 @@ class GiftType extends AbstractType
                 'attr'=>[
                     'class'=>''
                 ],
-                'label'=>'Image'
+                'label'=>'Image',
+                'download_label'=>true,
             ])
             ->add('link', TextType::class,[
                 'attr'=>[

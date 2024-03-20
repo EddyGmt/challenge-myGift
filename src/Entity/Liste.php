@@ -32,11 +32,14 @@ class Liste
     private ?string $password = null;
 
     // NOTE: This is not a mapped field of entity metadata, just a simple property.
-    #[Vich\UploadableField(mapping: 'liste', fileNameProperty: 'imageName')]
+    #[Vich\UploadableField(mapping: 'liste', fileNameProperty: 'imageName', size: 'imageSize')]
     private ?File $imageFile = null;
 
     #[ORM\Column(nullable: true)]
     private ?string $imageName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $imageSize = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_ouveture = null;
@@ -147,6 +150,16 @@ class Liste
     public function getImageName(): ?string
     {
         return $this->imageName;
+    }
+
+    public function setImageSize(?int $imageSize): void
+    {
+        $this->imageSize = $imageSize;
+    }
+
+    public function getImageSize(): ?int
+    {
+        return $this->imageSize;
     }
 
     public function getDateOuveture(): ?\DateTimeInterface
